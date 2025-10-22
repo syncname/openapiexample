@@ -1,0 +1,38 @@
+get:
+  tags: [Пользователи]
+  summary: Получить список пользователей
+  security: []
+  parameters:
+    - $ref: '../components/parameters/PageParam.yaml'
+    - $ref: '../components/parameters/LimitParam.yaml'
+  responses:
+    '200':
+      description: Список пользователей
+      headers:
+        X-Total-Count:
+          $ref: '../components/headers/TotalCount.yaml'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/User.yaml'
+
+post:
+  tags: [Пользователи]
+  summary: Создать нового пользователя
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/UserCreate.yaml'
+  responses:
+    '201':
+      description: Пользователь создан
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/User.yaml'
+    '400':
+      $ref: '../components/responses/ValidationError.yaml' 

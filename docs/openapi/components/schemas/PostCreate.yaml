@@ -1,0 +1,18 @@
+type: object
+required: [title, content]
+properties:
+  title:
+    type: string
+    minLength: 1
+    maxLength: 200
+  content:
+    type: string
+    minLength: 1
+  published:
+    type: boolean
+    default: false
+  tags:
+    type: array
+    items:
+      type: string
+    maxItems: 10 

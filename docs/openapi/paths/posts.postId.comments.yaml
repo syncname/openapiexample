@@ -1,0 +1,38 @@
+get:
+  tags: [Статьи, Комментарии]
+  summary: Получить комментарии к статье
+  externalDocs:
+    description: Руководство по работе с комментариями
+    url: https://docs.example.com/guides/comments
+  security: []
+  parameters:
+    - $ref: '../components/parameters/PostIdParam.yaml'
+    - $ref: '../components/parameters/PageParam.yaml'
+  responses:
+    '200':
+      description: Список комментариев
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/Comment.yaml'
+
+post:
+  tags: [Статьи, Комментарии]
+  summary: Добавить комментарий к статье
+  parameters:
+    - $ref: '../components/parameters/PostIdParam.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/CommentCreate.yaml'
+  responses:
+    '201':
+      description: Комментарий добавлен
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Comment.yaml' 

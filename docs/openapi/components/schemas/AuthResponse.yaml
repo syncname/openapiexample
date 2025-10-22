@@ -1,0 +1,11 @@
+type: object
+required: [token, user]
+properties:
+  token:
+    type: string
+    example: "eyJhbGciOiJIUzI1NiIs..."
+  expiresIn:
+    type: integer
+    example: 3600
+  user:
+    $ref: './User.yaml' 

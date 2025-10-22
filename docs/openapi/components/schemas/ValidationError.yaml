@@ -1,0 +1,24 @@
+type: object
+required: [code, message, errors]
+properties:
+  code:
+    type: string
+    example: "VALIDATION_ERROR"
+  message:
+    type: string
+    example: "Ошибка валидации входных данных"
+  errors:
+    type: array
+    items:
+      type: object
+      properties:
+        field:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+    example:
+      - field: "email"
+        code: "INVALID_FORMAT"
+        message: "Неверный формат email" 

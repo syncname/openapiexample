@@ -1,0 +1,12 @@
+description: Ошибка валидации
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/ValidationError.yaml'
+    example:
+      code: "VALIDATION_ERROR"
+      message: "Ошибка валидации входных данных"
+      errors:
+        - field: "email"
+          code: "INVALID_FORMAT"
+          message: "Неверный формат email" 

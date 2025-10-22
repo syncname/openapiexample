@@ -1,0 +1,23 @@
+get:
+  tags: [Корзина]
+  summary: Получить содержимое корзины
+  security: []
+  parameters:
+    - name: session_id
+      in: cookie
+      description: Идентификатор сессии
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    '200':
+      description: Содержимое корзины
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object 

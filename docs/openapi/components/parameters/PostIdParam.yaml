@@ -1,0 +1,8 @@
+name: postId
+in: path
+required: true
+description: ID поста
+schema:
+  type: integer
+  minimum: 1
+example: 42 

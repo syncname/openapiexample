@@ -1,0 +1,652 @@
+openapi: 3.0.3
+info:
+  title: Blog API
+  description: |
+    **Простое API блога** для изучения OpenAPI 3.0
+    
+    Включает все основные концепции:
+    - Аутентификация JWT
+    - CRUD операции с постами
+    - Комментарии
+    - Пагинация и фильтрация
+    
+  version: 1.0.0
+  contact:
+    name: Blog API Support
+    email: support@blog.com
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:4010
+    description: Development
+  - url: https://api.blog.com/{version}
+    description: Production
+    variables:
+      version:
+        default: v1
+        enum: [v1, v2]
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Аутентификация
+    description: Управление аутентификацией
+  - name: Пользователи
+    description: Управление пользователями блога
+  - name: Статьи
+    description: Операции с публикациями
+  - name: Комментарии
+    description: Работа с комментариями
+  - name: Категории
+    description: Управление категориями статей
+
+paths:
+  # === AUTHENTICATION ===
+  /auth/login:
+    post:
+      tags: [Аутентификация]
+      summary: Вход в систему
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: "user@blog.com"
+              password: "password123"
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # === USERS ===
+  /users:
+    get:
+      tags: [Пользователи]
+      summary: Получить список пользователей
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Список пользователей
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/TotalCount'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    
+    post:
+      tags: [Пользователи]
+      summary: Создать нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: Пользователь создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  # === POSTS ===
+  /posts:
+    get:
+      tags: [Статьи]
+      summary: Получить список статей
+      security: []
+      parameters:
+        - name: page
+          in: query
+          schema: 
+            type: integer
+            default: 1
+        - name: published
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - name: author_id
+          in: query
+          description: Фильтр по автору
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Список постов
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/TotalCount'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostList'
+
+    post:
+      tags: [Статьи]
+      summary: Создать новую статью
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreate'
+            example:
+              title: "Изучаем OpenAPI"
+              content: "В этой статье разберем основы..."
+              published: false
+      responses:
+        '201':
+          description: Пост создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /posts/{postId}:
+    get:
+      tags: [Статьи]
+      summary: Получить пост по ID
+      security: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Данные поста
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Статьи]
+      summary: Обновить пост
+      parameters:
+        - $ref: '#/components/parameters/PostIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUpdate'
+      responses:
+        '200':
+          description: Пост обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '403':
+          description: Нет прав на редактирование
+
+    delete:
+      tags: [Статьи]
+      summary: Удалить пост
+      parameters:
+        - $ref: '#/components/parameters/PostIdParam'
+      responses:
+        '204':
+          description: Пост удален
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # === COMMENTS ===
+  /posts/{postId}/comments:
+    get:
+      tags: [Статьи, Комментарии]
+      summary: Получить комментарии к статье
+      externalDocs:
+        description: Руководство по работе с комментариями
+        url: https://docs.example.com/guides/comments
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/PostIdParam'
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200':
+          description: Список комментариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+
+    post:
+      tags: [Статьи, Комментарии]
+      summary: Добавить комментарий к статье
+      parameters:
+        - $ref: '#/components/parameters/PostIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreate'
+      responses:
+        '201':
+          description: Комментарий добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+
+  # === PUBLIC STATUS ===
+  /status:
+    get:
+      tags: [Система]
+      summary: Статус API
+      security: []
+      parameters:
+        - name: X-API-Version
+          in: header
+          description: Версия API
+          schema:
+            type: string
+            enum: [v1, v2]
+            default: v1
+      responses:
+        '200':
+          description: Статус системы
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+                  version:
+                    type: string
+                    example: "1.0.0"
+
+  # === CART (Cookie example) ===
+  /cart:
+    get:
+      tags: [Корзина]
+      summary: Получить содержимое корзины
+      security: []
+      parameters:
+        - name: session_id
+          in: cookie
+          description: Идентификатор сессии
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Содержимое корзины
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT токен в заголовке Authorization.
+        Пример: `Authorization: Bearer <token>`
+
+  parameters:
+    PostIdParam:
+      name: postId
+      in: path
+      required: true
+      description: ID поста
+      schema:
+        type: integer
+        minimum: 1
+      example: 42
+
+    PageParam:
+      name: page
+      in: query
+      description: Номер страницы
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      description: Элементов на странице
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 10
+
+  headers:
+    TotalCount:
+      description: Общее количество элементов
+      schema:
+        type: integer
+      example: 150
+
+  responses:
+    ValidationError:
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+          example:
+            code: "VALIDATION_ERROR"
+            message: "Ошибка валидации входных данных"
+            errors:
+              - field: "email"
+                code: "INVALID_FORMAT"
+                message: "Неверный формат email"
+
+    UnauthorizedError:
+      description: Не авторизован
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: "UNAUTHORIZED"
+              message: "Требуется аутентификация"
+
+    NotFoundError:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    # === AUTH ===
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@blog.com"
+        password:
+          type: string
+          format: password
+          minLength: 6
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIs..."
+        expiresIn:
+          type: integer
+          example: 3600
+        user:
+          $ref: '#/components/schemas/User'
+
+    # === USER ===
+    User:
+      type: object
+      required: [id, email, name]
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          example: 1
+        email:
+          type: string
+          format: email
+          example: "john@blog.com"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "John Doe"
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+
+    UserCreate:
+      type: object
+      required: [email, name, password]
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        password:
+          type: string
+          format: password
+          minLength: 6
+
+    # === POSTS ===
+    Post:
+      type: object
+      required: [id, title, content]
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          example: 42
+        title:
+          type: string
+          maxLength: 200
+        content:
+          type: string
+        author:
+          $ref: '#/components/schemas/User'
+        authorId:
+          type: integer
+          example: 1
+        published:
+          type: boolean
+          default: false
+          example: true
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["openapi", "documentation", "api"]
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    PostCreate:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        content:
+          type: string
+          minLength: 1
+        published:
+          type: boolean
+          default: false
+        tags:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+
+    PostUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        content:
+          type: string
+          minLength: 1
+        published:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+
+    PostList:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # === COMMENTS ===
+    Comment:
+      type: object
+      required: [id, postId, authorId, content]
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        postId:
+          type: integer
+        authorId:
+          type: integer
+        author:
+          $ref: '#/components/schemas/User'
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    CommentCreate:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+
+    # === COMMON ===
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+        total:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    
+    ValidationError:
+      type: object
+      required: [code, message, errors]
+      properties:
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Ошибка валидации входных данных"
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              code:
+                type: string
+              message:
+                type: string
+          example:
+            - field: "email"
+              code: "INVALID_FORMAT"
+              message: "Неверный формат email"
+
+externalDocs:
+  description: Полная документация API блога
+  url: https://docs.example.com/api/blog

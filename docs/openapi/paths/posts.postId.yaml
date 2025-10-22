@@ -1,0 +1,54 @@
+get:
+  tags: [Статьи]
+  summary: Получить пост по ID
+  security: []
+  parameters:
+    - name: postId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    '200':
+      description: Данные поста
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Post.yaml'
+    '404':
+      $ref: '../components/responses/NotFoundError.yaml'
+
+put:
+  tags: [Статьи]
+  summary: Обновить пост
+  parameters:
+    - $ref: '../components/parameters/PostIdParam.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/PostUpdate.yaml'
+  responses:
+    '200':
+      description: Пост обновлен
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Post.yaml'
+    '404':
+      $ref: '../components/responses/NotFoundError.yaml'
+    '403':
+      description: Нет прав на редактирование
+
+delete:
+  tags: [Статьи]
+  summary: Удалить пост
+  parameters:
+    - $ref: '../components/parameters/PostIdParam.yaml'
+  responses:
+    '204':
+      description: Пост удален
+    '404':
+      $ref: '../components/responses/NotFoundError.yaml' 

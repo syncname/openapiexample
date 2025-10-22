@@ -1,0 +1,56 @@
+get:
+  tags: [Статьи]
+  summary: Получить список статей
+  security: []
+  parameters:
+    - name: page
+      in: query
+      schema: 
+        type: integer
+        default: 1
+    - name: published
+      in: query
+      schema:
+        type: boolean
+        default: true
+    - name: author_id
+      in: query
+      description: Фильтр по автору
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    '200':
+      description: Список постов
+      headers:
+        X-Total-Count:
+          $ref: '../components/headers/TotalCount.yaml'
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/PostList.yaml'
+
+post:
+  tags: [Статьи]
+  summary: Создать новую статью
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/PostCreate.yaml'
+        example:
+          title: "Изучаем OpenAPI"
+          content: "В этой статье разберем основы..."
+          published: false
+  responses:
+    '201':
+      description: Пост создан
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Post.yaml'
+    '400':
+      $ref: '../components/responses/ValidationError.yaml'
+    '401':
+      $ref: '../components/responses/UnauthorizedError.yaml' 
