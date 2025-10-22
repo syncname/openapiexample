@@ -95,6 +95,3 @@ npx @apidevtools/swagger-cli validate docs/openapi/openapi.yaml
 ```bash
 npx @apidevtools/swagger-cli validate docs/openapi.yaml
 ```
-
-## Лицензия
-MIT 
