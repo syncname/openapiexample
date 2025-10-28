@@ -90,12 +90,24 @@ find docs/openapi -type f -name "*.yaml" -print0 | xargs -0 -n1 -I{} sh -c 'yq e
 
 Примечание: `yq` не валидирует соответствие спецификации OpenAPI — он проверяет синтаксис YAML и помогает исследовать/инспектировать ссылки и структуры. Для схемной валидации используйте валидаторы OpenAPI (например, `swagger-cli validate`).
 
-### Swagger CLI: валидация OpenAPI
-- Проверка многофайловой спецификации:
+### Redocly CLI: валидация OpenAPI
+
+**Установка:**
 ```bash
-npx @apidevtools/swagger-cli validate docs/openapi/openapi.yaml
+npm install -g @redocly/cli
 ```
-- Проверка single-file спецификации:
+
+**Валидация модульной структуры:**
 ```bash
-npx @apidevtools/swagger-cli validate docs/openapi.yaml
+redocly lint docs/openapi/openapi.yaml
+```
+
+**Валидация монолитного файла:**
+```bash
+redocly lint docs/openapi.yaml 
+```
+
+**Сборка многофайловой спецификации в один файл:**
+```bash
+redocly bundle docs/openapi/openapi.yaml -o dist/openapi.yaml
 ```
