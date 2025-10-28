@@ -8,11 +8,15 @@
 
 ## Быстрый старт (Docker Compose)
 
-Требования: установлен Docker и Docker Compose.
 
 Переменные окружения (опционально):
 - `PRISM_PORT` (по умолчанию `4010`)
 - `SWAGGER_PORT` (по умолчанию `8080`)
+
+Запуск тестового примера
+```bash
+SPEC_PATH=basic.yaml docker compose up -d
+```
 
 Запуск сервисов (по умолчанию multi-file `docs/openapi/openapi.yaml`):
 ```bash
