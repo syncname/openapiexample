@@ -66,7 +66,7 @@ docker compose pull && docker compose up -d
   - `openapi/components/**` — компоненты (schemas, parameters, headers, responses, securitySchemes).
 - `docker-compose.yml` — запуск мок-сервера и Swagger UI.
 
-## Разработка
+## Валидация yaml файлов
 - Редактируйте файлы в `docs/openapi/**`.
 
 ### yq: проверка YAML и ссылок
